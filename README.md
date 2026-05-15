@@ -663,7 +663,61 @@ This mirrors how production AI systems are improved: not by only optimizing one 
 
 ---
 
-## 18. Technical Stack
+## 18. Product Quality Harness
+
+FCA is designed with a product quality harness around the core pipeline.
+
+The harness is not the product logic itself. It is a repeatable debugging, evaluation, and hardening workflow that helps the system improve without turning the main pipeline into a black box or a collection of sample-specific patches.
+
+In practice, this means FCA is evaluated through intermediate artifacts, not only through final commentary output. The system can inspect whether claim extraction, query expansion, candidate recall, evidence linking, support assessment, calculation, and audit each behaved correctly.
+
+| Harness Component | Purpose | Example Output |
+|---|---|---|
+| Dry-run harness | Runs representative sample data through onboarding / inference paths | Run summary, generated artifacts, failure notes |
+| Node-based debug artifacts | Captures intermediate outputs from key pipeline nodes | Claim extraction output, query expansion output, top-k candidates, evidence links |
+| Claim coverage audit | Classifies each claim by support status and failure mode | Covered, derived coverage, learned formula coverage, retrieval gap, mapping gap, external-context-needed |
+| Calculation / formula inspection | Tests whether direct values or calculated formulas reconcile to commentary claims | Formula candidates, source rows, reconciliation status, risk flags |
+| Smoke tests | Confirms provider integration and core contracts still work | Real-provider smoke output, contract validation logs |
+| Regression checks | Prevents previously fixed retrieval, mapping, or formula failures from returning | Sample-level comparison across iterations |
+
+This harness makes FCA easier to debug and safer to evolve. Instead of asking only whether the final commentary looks good, FCA asks where each claim succeeded or failed and why.
+
+For example, if a numeric claim is uncovered, the harness helps determine whether:
+
+1. the claim was extracted incorrectly;
+2. query expansion failed to include the right financial terms;
+3. the correct row was absent from the top-k candidate pool;
+4. the correct row was retrieved but not selected;
+5. the evidence was selected but support assessment failed;
+6. the claim requires calculation, formula repair, or related-row search;
+7. the claim requires external business context and should not be forced into table evidence.
+
+This supports the broader productization strategy: start with a controlled, observable MVP, then introduce stronger retrieval fallback, re-ranking, formula learning, calculation repair, and multi-agent orchestration only after the failure modes are understood.
+
+```mermaid
+flowchart TB
+    A[Representative Sample Data] --> B[Dry-run Harness]
+    B --> C1[Node 1: Claim Extraction]
+    C1 --> C2[Node 2: Query Expansion]
+    C2 --> C3[Node 3: Candidate Recall]
+    C3 --> C4[Node 4: Evidence Linking]
+    C4 --> C5[Node 5: Support Assessment]
+    C5 --> D[Claim Coverage Audit]
+    D --> E[Failure Mode Classification]
+    E --> F[Targeted Fix / Architecture Update]
+    F --> G[Regression Check]
+    G --> B
+
+    E --> E1[Retrieval Gap]
+    E --> E2[Mapping Gap]
+    E --> E3[Formula Boundary]
+    E --> E4[External Context Needed]
+    E --> E5[Manual Review]
+```
+
+---
+
+## 19. Technical Stack
 
 Planned / implemented stack areas include:
 
@@ -677,13 +731,13 @@ Planned / implemented stack areas include:
 | Calculation | deterministic calculation variants, formula policy, future CalculationAgent |
 | Generation | controlled generation prompt, structured output validation |
 | Frontend | React demo UI |
-| Evaluation | claim coverage audit, sample-driven debugging, smoke tests, artifact-based review |
+| Evaluation / Quality Harness | dry-run harness, node-based debug artifacts, claim coverage audit, sample-driven debugging, smoke tests, regression checks |
 | Memory | tenant memory cache, historical example index, formula pattern memory |
 | Future Architecture | multi-agent workflow, LangGraph or equivalent orchestration |
 
 ---
 
-## 19. Progressive Productization Strategy
+## 20. Progressive Productization Strategy
 
 FCA is intentionally designed as a staged productization path rather than an agent-heavy system from day one.
 
@@ -721,7 +775,7 @@ This staged approach demonstrates a key product principle:
 
 ---
 
-## 20. MVP vs Production vs Final Architecture
+## 21. MVP vs Production vs Final Architecture
 
 ### MVP
 
@@ -773,7 +827,7 @@ Potential agents:
 
 ---
 
-## 21. Key Design Principles
+## 22. Key Design Principles
 
 ### 1. Do not make the Generation Layer a black box
 
@@ -805,7 +859,7 @@ The system should learn from cases where evidence is missed, calculation does no
 
 ---
 
-## 22. Recommended Portfolio Figures
+## 23. Recommended Portfolio Figures
 
 For a public-facing product case study, the strongest figures are:
 
@@ -822,7 +876,7 @@ The first three figures are the most important for a short consultant review. Th
 
 ---
 
-## 23. Roadmap
+## 24. Roadmap
 
 Near-term:
 
@@ -851,7 +905,7 @@ Long-term:
 
 ---
 
-## 24. Repository Disclosure Note
+## 25. Repository Disclosure Note
 
 The full implementation codebase, detailed prompts, proprietary contracts, raw datasets, and internal debug artifacts are kept private.
 
@@ -859,6 +913,6 @@ This public case study is intended to share the product vision, architecture, re
 
 ---
 
-## 25. One-Sentence Summary
+## 26. One-Sentence Summary
 
 FCA is an evidence-grounded, tenant-aware AI financial analyst system that turns repetitive FP&A commentary work into a structured, reviewable, auditable, and continuously improving AI workflow.

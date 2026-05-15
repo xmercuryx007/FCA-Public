@@ -2,65 +2,66 @@
 
 ### An AI Engineering Case Study for Evidence-Grounded FP&A Commentary
 
-**FCA** is a tenant-aware, evidence-grounded AI engineering project that explores how FP&A commentary can be generated from financial data, historical commentary patterns, and reviewable evidence trails.
+**FCA** is a tenant-aware, evidence-grounded AI engineering project that explores how recurring FP&A performance commentary can be turned into a reviewable AI analyst workflow. Commentary is the visible output; the engineering focus is the recurring performance explanation workflow behind it: deciding what changed, what is material, what evidence supports it, what requires calculation, and what needs human review.
 
-This project is not a generic RAG chatbot or a simple LLM text-generation demo. It is a portfolio case study in boundary-aware AI system design: identifying material movements, selecting drivers, grounding claims in evidence, handling calculation boundaries, learning tenant-specific formulas, and producing commentary that can be reviewed, audited, and improved through feedback.
+Instead of treating commentary as a one-shot text-generation task, this project focuses on boundary-aware AI system design: identifying material movements, selecting drivers, grounding claims in evidence, handling calculation boundaries, learning tenant-specific formulas, and producing commentary that can be reviewed, audited, and improved through feedback.
 
-> **Core idea:** The goal is not to make AI sound like a financial analyst. The goal is to make AI behave like a reviewable financial analyst.
+> **Core idea:** The system should behave like a reviewable financial analyst workflow: evidence-backed, calculation-aware, standard-compliant, and human-reviewable.
 
-
-> **Portfolio scope:** This README is written as an AI engineering case study for portfolio and technical discussion purposes. It focuses on system design, implementation trade-offs, debugging workflow, and evaluation strategy, without positioning FCA as a commercial product or exposing private implementation details.
 
 ---
 
 ## 1. Project Overview
 
-Finance teams repeatedly write monthly or quarterly commentary explaining financial performance, budget variance, prior-period movement, and business drivers.
+Finance / FP&A teams repeatedly produce monthly or quarterly commentary to explain actuals versus budget, prior-period movement, forecast changes, business drivers, and exceptions that require management attention.
 
-This work is repetitive, but it is also high-stakes. A good commentary is not just fluent prose. It must be:
+The workflow looks repetitive on the surface, but the hard part is not simply writing faster. FP&A commentary is a standardized communication and review layer between analysts, managers, executives, and downstream readers. Each reporting cycle requires analysts to decide what changed, whether the movement is material enough to call out, which account / LOB / department / vendor / business dimension drove the movement, whether the numbers reconcile, and how the explanation should be phrased according to the team's reporting standard.
 
-- consistent with the team’s historical writing pattern;
-- grounded in the correct financial data;
-- aligned with materiality and driver-selection logic;
-- explainable to reviewers and managers;
-- careful about calculation assumptions and unsupported claims;
-- auditable enough for finance workflows.
+A useful AI system for this workflow therefore cannot be a simple text-generation layer. It needs to help with:
 
-FCA addresses this by combining tenant memory, dynamic retrieval, structured claim understanding, evidence grounding, calculation/reconciliation design, controlled generation, and human review.
+- deciding which movements are material enough to mention;
+- selecting drivers across flexible business dimensions such as account, LOB, department, vendor, region, or other tenant-specific dimensions;
+- preserving consistent team language, recurring structure, and shared metric definitions;
+- understanding company-specific formula conventions, basis rules, and scope definitions;
+- grounding financial claims in the right rows, periods, scopes, units, and bases;
+- checking whether numbers, calculations, and reconciliations make sense before review;
+- distinguishing table-supported claims from event-driven or management-context claims;
+- showing source evidence, calculation lineage, support status, confidence, and risk flags;
+- learning from approved edits without bypassing governance or audit boundaries.
+
+FCA decomposes the workflow into separate responsibilities: tenant memory, dynamic retrieval, structured claim understanding, evidence grounding, calculation/reconciliation, controlled generation, quality evaluation, and human review.
+
+A central design insight is that finance commentary patterns function as a team's operating standard: callout rules, materiality thresholds, driver-selection logic, metric definitions, formulas, preferred phrasing, reviewer expectations, and approval patterns.
 
 ---
 
 ## 2. Why This Problem Matters
 
-Many AI writing tools can generate a paragraph that looks like financial commentary. But in real finance workflows, the difficult question is not only:
+Many AI writing tools can generate a paragraph that looks like financial commentary. In a real finance workflow, the harder question is whether an AI system can decide what is worth saying, ground each material financial claim in evidence, flag unsupported or calculation-boundary statements, distinguish table-supported claims from external-context claims, and produce reviewable artifacts for human oversight.
 
-> Can the AI write a fluent paragraph?
-
-The real challenge is:
-
-> The real challenge is not whether an LLM can write a fluent paragraph, but whether an AI system can decide what is worth saying, ground each material financial claim in evidence, flag unsupported or calculation-boundary statements, distinguish table-supported claims from external-context claims, and produce reviewable artifacts for human oversight.
-
-FCA is designed around this second challenge.
+FCA is designed around that system-level challenge.
 
 ### Key pain points in current finance commentary workflows
 
 | Pain Point | Why It Matters | FCA Design Response |
 |---|---|---|
-| Repetitive commentary drafting | Analysts repeatedly explain similar metrics and movements every period | Learn historical patterns and generate structured drafts |
-| Inconsistent wording across analysts | Reviewers want standardized language and logic | Tenant-specific style and pattern memory |
-| Driver selection is judgment-heavy | Not every large movement should be discussed | Decision Layer separates what to say from how to say it |
-| Claims may lack evidence | Finance commentary must be reviewable | Claim-level evidence grounding and audit trail |
-| Some values require calculation | Not all commentary claims map to one table row | Calculation and reconciliation boundary design |
-| Company-specific formulas may differ | Standard formulas may not match how a team reports metrics | Tenant formula learning and formula memory |
-| External context may be needed | Some explanations require events, management narrative, or macro context | Event/context boundary and human review flags |
+| Recurring commentary is a high-review-cost workflow | Analysts repeat similar reporting cycles, but each cycle still requires detailed judgment, data checks, and manager review | Turn commentary generation into a structured, evidence-backed workflow rather than a free-form writing task |
+| Teams need standardized reporting language | Consistent structure and terminology help reviewers, managers, and readers understand recurring metrics quickly | Learn and preserve tenant-specific reporting standards beyond writing style |
+| Driver selection is judgment-heavy | A large movement is not always the right story, and a smaller movement may matter if it explains the business narrative | Separate Decision Layer from Generation Layer so the system reasons about what to say before writing |
+| Financial numbers require validation and reconciliation | Teams often validate key numbers manually, but full coverage is time-consuming and error-prone | Check source evidence, calculation lineage, scope/basis alignment, and reconciliation status before review |
+| Financial definitions can be tenant-specific | Teams may use company-specific formulas, basis conventions, or scope definitions that generic models do not know | Learn validated formula patterns and preserve formula memory with reconciliation checks |
+| Some explanations are not in the table | Special events, management narrative, and macro context cannot always be proven from the financial table alone | Distinguish table-supported claims from external-context-needed claims and route them to human review |
+| Generic AI summaries can miss the last-mile workflow | Existing summaries may explain variance faster, but may not enforce reporting standards, evidence support, calculation checks, or approval feedback learning | Produce reviewable commentary artifacts with source evidence, calculation trace, support status, risk flags, and feedback memory |
 
----
+### Why this workflow is now technically feasible
+
+This workflow has historically been hard to operationalize or automate because financial exports vary by company, commentary rules are often implicit, and judgment is distributed across Excel logic, analyst experience, SOPs, and reviewer preferences. Modern LLMs, retrieval systems, structured outputs, and human-in-the-loop workflows make it more feasible to connect messy tables, historical commentary, evidence grounding, calculation checks, and reviewable generation into one controlled system.
 
 ## 3. System Goal
 
 FCA is structured as an **AI-assisted financial analyst workflow**, not as a generic chatbot.
 
-The goal of the project is to show how a finance commentary workflow can be decomposed into technical components that are evidence-grounded, reviewable, and safe to iterate.
+The goal of the project is to show how a recurring FP&A performance explanation workflow can be decomposed into technical components that are evidence-grounded, reviewable, and safe to iterate.
 
 The target workflow is organized around the following inputs:
 
@@ -76,12 +77,13 @@ The system then produces FP&A-style commentary with:
 - claim-to-evidence mapping;
 - driver-selection rationale;
 - calculation lineage if derived metrics are used;
+- reconciliation / support status;
 - confidence and risk flags;
 - audit status;
 - human-review-friendly outputs;
 - feedback learning for future periods.
 
----
+The broader system goal is to preserve and enforce tenant-specific reporting standards while making each important commentary statement easier to review.
 
 ## 4. From FP&A Workflow to AI System
 
@@ -113,7 +115,17 @@ The central design principle is:
 
 ## 5. Why FCA Is Not Generic RAG
 
-A simple RAG system retrieves historical examples and asks an LLM to write a new paragraph. FCA goes further.
+A simple RAG system retrieves historical examples and asks an LLM to write a new paragraph. FCA uses retrieval differently: historical examples support tenant pattern learning, while current-period evidence is used to ground and audit specific commentary claims.
+
+The stronger comparison is:
+
+| Generic AI Summary | FCA Reviewable Output |
+|---|---|
+| Produces a fluent explanation | Shows the key commentary statement plus source evidence |
+| May summarize variance at a high level | Links statements to rows, periods, units, scope, and basis |
+| May not expose why a claim is supported | Shows calculation trace, support status, and risk flags |
+| May not preserve team-specific standards | Uses tenant memory for reporting standards, terminology, formulas, and approval patterns |
+| Usually stops at text output | Supports human review, approval, and feedback learning |
 
 FCA separates:
 
@@ -122,6 +134,7 @@ FCA separates:
 - claim understanding from candidate retrieval;
 - evidence selection from final evidence audit;
 - calculation reasoning from prose generation;
+- reporting-standard memory from one-off writing style;
 - workflow orchestration from UI display.
 
 ```mermaid
@@ -142,12 +155,12 @@ FCA is best described as:
 
 > **Tenant Memory Cache + Dynamic Evidence Retrieval + Auditable Claim-Grounded Generation**
 
-- **CAG / Tenant Memory Cache** stores stable tenant knowledge: style, glossary, commentary patterns, materiality preferences, calculation/audit policies, learned formulas, and known caveats.
+- **CAG / Tenant Memory Cache** stores stable tenant knowledge: reporting standards, style, glossary, commentary patterns, materiality preferences, calculation/audit policies, learned formulas, reviewer preferences, approval patterns, and known caveats.
 - **RAG / Retrieval** retrieves dynamic historical examples and current-period evidence candidates.
 - **Evidence Mapping and Audit** ensure that generated commentary is grounded and reviewable.
 - **Decision Layer** determines what should be discussed before generation.
 
----
+Existing FP&A copilots, BI tools, or EPM narrative features may already help users summarize or read data faster. FCA focuses on what happens after a variance is summarized: enforcing commentary standards, linking statements to evidence, checking calculation support, flagging unsupported claims, and capturing approved feedback.
 
 ## 6. Onboarding vs Inference
 
@@ -212,6 +225,11 @@ flowchart TB
 ```
 
 ---
+
+### Tenant-isolated reporting memory
+
+The moat of this approach is not cross-tenant data mixing. Each tenant's memory should remain isolated and should be built only from that team's authorized historical data, commentary, formulas, evidence history, review decisions, and approved edits. Over time, this creates tenant-specific reporting memory around how the team explains performance.
+
 
 ## 7. System Architecture
 
@@ -364,7 +382,7 @@ Claim-aware QueryExpansion
 
 This follows a common retrieval-system pattern: use a broader recall stage to avoid missing relevant evidence, then apply a more expensive ranking or reasoning step to select the best support.
 
-The lesson is that evidence grounding is not only a generation problem. It is a **recall, ranking, support-validation, and audit problem**.
+The lesson is that evidence grounding depends on **recall, ranking, support validation, and audit**, not generation quality alone.
 
 ---
 
@@ -521,32 +539,13 @@ This allows FCA to distinguish between:
 | Formula boundary | No validated formula reconciles | Flag as calculation-boundary / human review |
 | External event context | Explanation depends on event or management narrative | Do not force numeric evidence; request context |
 
-### Agent-Ready Evolution Example: Calculation and Formula Repair
-
-Calculation is one representative example of FCA's broader agent-ready design. The final architecture is not intended to rely on a single `CalculationAgent`; instead, FCA defines responsibility-scoped roles that may later become standalone agents, deterministic tools, or orchestrated sub-workflows.
-
-Calculation is a strong example because it shows why the system should not rely on an LLM alone. Formula repair requires a deterministic calculator tool, formula policy, reconciliation checks, controlled tool use, and human review boundaries. It also shows why onboarding can be used to learn tenant-specific formula patterns rather than treating every formula mismatch as unsupported evidence.
-
-In the final architecture, when a standard calculation fails, the system should not immediately label the claim unsupported. Instead, a controlled calculation / formula-repair role should:
-
-1. detect the mismatch between the claim amount and the simple formula result;
-2. search related rows, metric variants, and reporting basis candidates;
-3. consult tenant memory, formula policy, approved formula registry, and potentially trusted documentation sources;
-4. propose candidate formulas under policy;
-5. run deterministic recalculation through a controlled calculation tool;
-6. reconcile the result against the commentary target and any known reported anchors;
-7. store validated tenant-specific formulas in tenant memory;
-8. flag unresolved cases as calculation-boundary rather than unsupported evidence.
-
-This is one of the reasons FCA uses a staged architecture: formula repair requires iteration, tool use, reconciliation, and careful audit. It is a strong candidate for future agentization, but only after deterministic validation and responsibility boundaries are clear.
-
 ### System framing
 
 This capability should not be framed as a separate add-on called “validation.” It is part of FCA’s core trust layer.
 
-FCA naturally checks whether commentary claims, source evidence, and underlying calculations reconcile before analyst review. In other words:
+FCA naturally checks whether commentary claims, source evidence, and underlying calculations reconcile before analyst review.
 
-> FCA does not only generate commentary. It checks whether the numbers behind the commentary make sense.
+> FCA checks whether the numbers behind the commentary make sense before they become part of a reviewable explanation.
 
 ---
 
@@ -593,7 +592,7 @@ A generated commentary bullet should be linked to:
 
 Example sanitized audit trace:
 
-A useful evidence record should make the support basis explicit, not just store a row ID. In FCA, support quality is judged across metric alignment, numeric reconciliation, and scope / period / basis consistency.
+A useful evidence record should make the support basis explicit instead of storing only a row ID. In FCA, support quality is judged across metric alignment, numeric reconciliation, and scope / period / basis consistency.
 
 | Claim | Evidence | Match Basis | Support Status | Risk Flag |
 |---|---|---|---|---|
@@ -606,7 +605,7 @@ A useful evidence record should make the support basis explicit, not just store 
 
 ## 16. Demo Walkthrough
 
-A future demo flow should show the user experience end to end.
+The demo walkthrough is designed to illustrate the end-to-end FCA workflow: current-period data ingestion, evidence-grounded commentary generation, evidence and risk review, human edits, and final approval.
 
 ```mermaid
 flowchart LR
@@ -618,7 +617,7 @@ flowchart LR
     F --> G[Approved Commentary Memory]
 ```
 
-### Demo artifacts to include
+### Key demo artifacts
 
 - sanitized financial input preview;
 - generated commentary card;
@@ -678,7 +677,7 @@ FCA is designed with a quality harness around the core pipeline.
 
 The harness is not the core pipeline logic itself. It is a repeatable debugging, evaluation, and hardening workflow that helps the system improve without turning the main pipeline into a black box or a collection of sample-specific patches.
 
-In practice, this means FCA is evaluated through intermediate artifacts, not only through final commentary output. The system can inspect whether claim extraction, query expansion, candidate recall, evidence linking, support assessment, calculation, and audit each behaved correctly.
+In practice, FCA is evaluated through intermediate artifacts as well as final commentary output. The system can inspect whether claim extraction, query expansion, candidate recall, evidence linking, support assessment, calculation, and audit each behaved correctly.
 
 | Harness Component | Purpose | Example Output |
 |---|---|---|
@@ -793,6 +792,26 @@ Some roles may remain deterministic tools. Some may stay as LLM-assisted functio
 
 Evidence grounding is the core system backbone of FCA. Calculation and formula repair is used as the deep-dive example because it clearly shows why certain responsibilities should evolve from deterministic rules into controlled, tool-using agentic workflows.
 
+### Agent-Ready Evolution Example: Calculation and Formula Repair
+
+Calculation is one representative example of FCA's broader agent-ready design. The final architecture is not intended to rely on a single `CalculationAgent`; instead, FCA defines responsibility-scoped roles that may later become standalone agents, deterministic tools, or orchestrated sub-workflows.
+
+Calculation is a strong example because it shows why the system should not rely on an LLM alone. Formula repair requires a deterministic calculator tool, formula policy, reconciliation checks, controlled tool use, and human review boundaries. It also shows why onboarding can be used to learn tenant-specific formula patterns rather than treating every formula mismatch as unsupported evidence.
+
+In the final architecture, when a standard calculation fails, the system should not immediately label the claim unsupported. Instead, a controlled calculation / formula-repair role should:
+
+1. detect the mismatch between the claim amount and the simple formula result;
+2. search related rows, metric variants, and reporting basis candidates;
+3. consult tenant memory, formula policy, approved formula registry, and potentially trusted documentation sources;
+4. propose candidate formulas under policy;
+5. run deterministic recalculation through a controlled calculation tool;
+6. reconcile the result against the commentary target and any known reported anchors;
+7. store validated tenant-specific formulas in tenant memory;
+8. flag unresolved cases as calculation-boundary rather than unsupported evidence.
+
+This is one of the reasons FCA uses a staged architecture: formula repair requires iteration, tool use, reconciliation, and careful audit. It is a strong candidate for future agentization, but only after deterministic validation and responsibility boundaries are clear.
+
+
 ### Why not agent-heavy from day one?
 
 | Design Question | FCA Approach |
@@ -881,36 +900,32 @@ Qualitative or event-driven explanations may require external context and human 
 
 ### 6. Human review is part of the system, not an afterthought
 
-FCA is designed to produce reviewable artifacts, not just final text.
+FCA is designed to produce reviewable artifacts instead of final text alone.
 
-### 7. Improve the system by investigating failure modes, not only by optimizing final text quality
+### 7. Improve the system by investigating failure modes before optimizing final text quality
 
 The system should learn from cases where evidence is missed, calculation does not reconcile, or external context is required.
 
 ---
 
-## 23. Recommended Portfolio Figures
+## 23. System Diagrams
 
-For a public portfolio case study, the strongest figures are:
+The following four diagrams summarize the current visual materials for this case study.
 
-| Figure | Purpose |
+| Diagram | What It Shows |
 |---|---|
-| `fca_system_architecture_overview.png` | Show the end-to-end system architecture |
-| `onboarding_vs_inference_comparison_chart.png` | Explain historical pattern learning vs current evidence grounding |
-| `system_architecture_and_agent_evolution_diagram.png` | Show current implementation, guardrails, and future agent evolution |
-| `evidence_recall_reranking_iteration.png` | Show how claim-aware retrieval and reranking improved evidence recall |
-| `tenant_formula_learning_flow.png` | Show how onboarding can learn validated tenant-specific formulas |
-| `claim_coverage_audit_matrix.png` | Show how covered, missed, calculable, and external-context claims are classified |
+| `fca_system_architecture_overview.png` | End-to-end architecture from financial inputs to reviewable commentary |
+| `onboarding_vs_inference_comparison_chart.png` | Difference between historical pattern learning and current-period evidence grounding |
+| `system_architecture_and_agent_evolution_diagram.png` | Current implementation, guardrails, and future agent-ready evolution |
+| `quality_harness_and_debug_workflow.png` | Debugging, evaluation, and system hardening workflow |
 
-The first three figures are the most important for a short consultant review. The later figures are useful for a deeper technical case study.
-
----
+These diagrams are intended to provide a concise visual overview of the system architecture, workflow boundary, agent-ready evolution path, and quality harness.
 
 ## 24. Roadmap
 
 Near-term:
 
-- improve portfolio-facing case study materials;
+- refine technical documentation and demo walkthrough materials;
 - add polished architecture diagrams;
 - add sanitized UI screenshots;
 - summarize claim coverage audit results;
@@ -933,16 +948,3 @@ Long-term:
 - support recency-aware tenant pattern drift;
 - support full claim-level evidence audit and feedback learning.
 
----
-
-## 25. Repository Disclosure Note
-
-The full implementation codebase, detailed prompts, proprietary contracts, raw datasets, and internal debug artifacts are kept private.
-
-This public case study is intended to share the system design, architecture, reasoning workflow, sanitized examples, and evaluation approach without exposing sensitive implementation details or confidential data.
-
----
-
-## 26. One-Sentence Summary
-
-FCA is an evidence-grounded, tenant-aware AI financial analyst system that turns repetitive FP&A commentary work into a structured, reviewable, auditable, and continuously improving AI workflow.

@@ -504,7 +504,59 @@ Planned / implemented stack areas include:
 
 ---
 
-## 16. MVP vs Production vs Final Architecture
+## 16. Progressive Productization Strategy
+
+FCA is intentionally designed as a staged productization path rather than an agent-heavy system from day one.
+
+The initial implementation focuses on building a reliable, reviewable foundation first: clear module boundaries, deterministic guardrails, structured contracts, evidence artifacts, claim coverage diagnostics, and human-review-friendly outputs.
+
+This is a deliberate engineering choice. In enterprise AI workflows, especially finance workflows, adding agents too early can hide responsibility boundaries and make errors harder to debug. FCA therefore starts with a controlled, modular MVP and evolves toward multi-agent orchestration only after the system has established which responsibilities should remain deterministic, which should be LLM-assisted, and which are mature enough to become agents.
+
+```mermaid
+flowchart LR
+    A[Rule-based / Deterministic Foundation] --> B[LLM-Assisted Reasoning Modules]
+    B --> C[Agent-Ready Responsibility Boundaries]
+    C --> D[Production Hardening]
+    D --> E[Final Multi-Agent Architecture]
+
+    A1[Validation rules
+Pydantic contracts
+Tenant isolation] --> A
+    B1[Claim extraction
+Query expansion
+Evidence judgment
+Controlled generation] --> B
+    C1[Decision Layer
+Calculation boundary
+Evidence mapping
+Audit boundary] --> C
+    D1[Observability
+Recall fallback
+Approval workflow
+Latency optimization] --> D
+    E1[CalculationAgent
+EvidenceAuditAgent
+EventContextAgent
+FeedbackLearningAgent] --> E
+```
+
+This staged approach demonstrates a key product principle:
+
+> Move fast enough to ship a useful AI workflow, but not so fast that the system becomes an unreviewable black box.
+
+### Why not agent-heavy from day one?
+
+| Design Question                                                              | FCA Approach                                                                                                           |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Should every reasoning step become an agent immediately?                     | No. First define clear responsibility boundaries and failure modes.                                                    |
+| Should the LLM freely decide evidence, calculation, and generation together? | No. Separate claim understanding, retrieval, evidence linking, calculation, decision, generation, and audit.           |
+| Should MVP solve every final capability?                                     | No. MVP should simplify capability while preserving correct architecture boundaries.                                   |
+| When should agents be introduced?                                            | After the workflow proves which responsibilities require autonomous planning, tool use, fallback, or iterative repair. |
+| What is the practical goal?                                                  | Build a system that is useful, debuggable, reviewable, and ready to evolve.                                            |
+
+---
+
+## 17. MVP vs Production vs Final Architecture
 
 ### MVP1
 

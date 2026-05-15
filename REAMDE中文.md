@@ -450,7 +450,7 @@ FCA 从一个可控 foundation 开始：
 
 ### Final architecture direction
 
-未来的 `CalculationAgent` 应该支持：
+Calculation / formula repair 是未来一个 agent-ready role，但不是唯一会 agent 化的能力。在最终架构中，这个 role 应该支持：
 
 - controlled formula repair；
 - related-row search；
@@ -520,15 +520,19 @@ flowchart TB
 | Formula boundary | 没有 validated formula 可以 reconcile | Flag as calculation-boundary / human review |
 | External event context | Explanation 依赖 event 或 management narrative | 不强行匹配 numeric evidence；request context |
 
-### Future CalculationAgent behavior
+### Agent-Ready Evolution Example: Calculation and Formula Repair
 
-在最终架构中，当 standard calculation 失败时，系统不应该立刻把 claim 标为 unsupported。相反，一个 controlled `CalculationAgent` 应该：
+Calculation 是 FCA broader agent-ready design 的一个代表性例子。最终架构不是只依赖一个 `CalculationAgent`；相反，FCA 会先定义清晰的 responsibility-scoped roles，这些 roles 未来可以分别演进为 standalone agents、deterministic tools，或由 orchestrator 调用的 sub-workflows。
+
+Calculation 之所以适合作为例子，是因为它能清楚展示为什么系统不能一开始就全靠 LLM。Formula repair 需要 deterministic calculator tool、formula policy、reconciliation checks、controlled tool use，以及 human review boundaries。它也能说明为什么 onboarding 可以学习 tenant-specific formula patterns，而不是把每一次 formula mismatch 都当成 unsupported evidence。
+
+在最终架构中，当 standard calculation 失败时，系统不应该立刻把 claim 标为 unsupported。相反，一个受控的 calculation / formula-repair role 应该：
 
 1. 检测 claim amount 和 simple formula result 之间的 mismatch；
 2. 搜索 related rows、metric variants 和 reporting basis candidates；
 3. 查询 tenant memory、formula policy、approved formula registry，以及可能的 trusted documentation sources；
 4. 在 policy 下提出 candidate formulas；
-5. 执行 deterministic recalculation；
+5. 通过受控 deterministic calculation tool 执行 recalculation；
 6. 将结果与 commentary target 和已知 reported anchors reconcile；
 7. 将 validated tenant-specific formulas 存入 tenant memory；
 8. 将 unresolved cases 标记为 calculation-boundary，而不是 unsupported evidence。
@@ -760,12 +764,33 @@ flowchart LR
     B1[Claim extraction<br/>Query expansion<br/>Evidence judgment<br/>Controlled generation] --> B
     C1[Decision Layer<br/>Calculation boundary<br/>Evidence mapping<br/>Audit boundary] --> C
     D1[Observability<br/>Recall fallback<br/>Reranking<br/>Approval workflow] --> D
-    E1[CalculationAgent<br/>EvidenceAuditAgent<br/>EventContextAgent<br/>FeedbackLearningAgent] --> E
+    E1[Role-based agents<br/>Claim / Retrieval / Evidence<br/>Calculation / Audit / Generation<br/>Feedback Learning] --> E
 ```
 
 这种 staged approach 体现了一个关键 engineering principle：
 
 > 要足够快地 ship 一个有用的 AI workflow，但不能快到让系统变成一个无法 review 的黑箱。
+
+### Future Agent-Ready Roles
+
+FCA 未来的 agent architecture 是 **role-based（按责任角色划分）**，而不是简单按 module name 机械拆分。目标不是把每个 component 都变成 agent，而是识别哪些责任真正需要 iterative reasoning、tool use、fallback、repair 或 independent verification。
+
+有些 role 可以继续保持 deterministic tools；有些 role 可以保持 LLM-assisted functions；有些 role 未来可以在 orchestrator 下演进成 standalone agents。
+
+| Agent-Ready Role | Responsibility | 为什么可能适合 agent 化 |
+|---|---|---|
+| Claim Understanding | 把 commentary 分解成 structured financial claims | 需要 semantic interpretation 和 ambiguity handling |
+| Query Expansion | 把 claims 转换成适合 retrieval 的 financial terms | 适合 LLM-assisted terminology expansion |
+| Retrieval / Candidate Recall | 召回更广的 candidate evidence | 需要 recall fallback、search strategy control 和 broader candidate pools |
+| Evidence Mapping | 把 claims link 到最合适的 supporting evidence | 需要综合判断 metric、number、scope、period、unit 和 basis |
+| Evidence Audit | 独立检查 support quality 和 risk flags | 需要验证 selected evidence 和 unresolved claim boundaries |
+| Calculation / Formula Repair | 处理 derived claims 和 tenant-specific formulas | 需要 related-row search、formula hypothesis、deterministic recalculation 和 reconciliation 的循环 |
+| Event Context | 区分 table-supported claims 和 external-context claims | 需要判断什么时候不应该强行匹配 numeric evidence |
+| Decision / Driver Selection | 判断什么值得写、什么应该省略 | 需要 materiality judgment、tenant pattern memory 和 driver selection logic |
+| Generation | 基于 structured decisions 和 evidence 写 commentary | 需要 style control、grounded wording 和 structured output validation |
+| Feedback Learning | 从 approved edits 和 finalized commentary 中学习 | 需要安全更新 tenant memory 和 historical patterns |
+
+Evidence grounding 是 FCA 的系统主干。Calculation and formula repair 在这里作为 deep-dive example，是因为它最清楚地展示了为什么某些责任需要从 deterministic rules 演进到受控的、会使用工具的 agentic workflow。
 
 ### 为什么不是从第一天就 agent-heavy？
 

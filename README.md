@@ -451,7 +451,7 @@ This is not a limitation of the project scope. It is a deliberate staged approac
 
 ### Final architecture direction
 
-A future `CalculationAgent` should support:
+Calculation / formula repair is one future agent-ready role, not the only planned agentic capability. In the final architecture, this role should support:
 
 - controlled formula repair;
 - related-row search;
@@ -521,15 +521,19 @@ This allows FCA to distinguish between:
 | Formula boundary | No validated formula reconciles | Flag as calculation-boundary / human review |
 | External event context | Explanation depends on event or management narrative | Do not force numeric evidence; request context |
 
-### Future CalculationAgent behavior
+### Agent-Ready Evolution Example: Calculation and Formula Repair
 
-In the final architecture, when a standard calculation fails, the system should not immediately label the claim unsupported. Instead, a controlled `CalculationAgent` should:
+Calculation is one representative example of FCA's broader agent-ready design. The final architecture is not intended to rely on a single `CalculationAgent`; instead, FCA defines responsibility-scoped roles that may later become standalone agents, deterministic tools, or orchestrated sub-workflows.
+
+Calculation is a strong example because it shows why the system should not rely on an LLM alone. Formula repair requires a deterministic calculator tool, formula policy, reconciliation checks, controlled tool use, and human review boundaries. It also shows why onboarding can be used to learn tenant-specific formula patterns rather than treating every formula mismatch as unsupported evidence.
+
+In the final architecture, when a standard calculation fails, the system should not immediately label the claim unsupported. Instead, a controlled calculation / formula-repair role should:
 
 1. detect the mismatch between the claim amount and the simple formula result;
 2. search related rows, metric variants, and reporting basis candidates;
 3. consult tenant memory, formula policy, approved formula registry, and potentially trusted documentation sources;
 4. propose candidate formulas under policy;
-5. run deterministic recalculation;
+5. run deterministic recalculation through a controlled calculation tool;
 6. reconcile the result against the commentary target and any known reported anchors;
 7. store validated tenant-specific formulas in tenant memory;
 8. flag unresolved cases as calculation-boundary rather than unsupported evidence.
@@ -761,12 +765,33 @@ flowchart LR
     B1[Claim extraction<br/>Query expansion<br/>Evidence judgment<br/>Controlled generation] --> B
     C1[Decision Layer<br/>Calculation boundary<br/>Evidence mapping<br/>Audit boundary] --> C
     D1[Observability<br/>Recall fallback<br/>Reranking<br/>Approval workflow] --> D
-    E1[CalculationAgent<br/>EvidenceAuditAgent<br/>EventContextAgent<br/>FeedbackLearningAgent] --> E
+    E1[Role-based agents<br/>Claim / Retrieval / Evidence<br/>Calculation / Audit / Generation<br/>Feedback Learning] --> E
 ```
 
 This staged approach demonstrates a key engineering principle:
 
 > Move fast enough to ship a useful AI workflow, but not so fast that the system becomes an unreviewable black box.
+
+### Future Agent-Ready Roles
+
+FCA's future agent architecture is **role-based, not module-name-based**. The goal is not to convert every component into an agent. The goal is to identify which responsibilities require iterative reasoning, tool use, fallback, repair, or independent verification.
+
+Some roles may remain deterministic tools. Some may stay as LLM-assisted functions. Some may evolve into standalone agents under a future orchestrator.
+
+| Agent-Ready Role | Responsibility | Why It May Become Agentic |
+|---|---|---|
+| Claim Understanding | Break commentary into structured financial claims | Requires semantic interpretation and ambiguity handling |
+| Query Expansion | Translate claims into retrieval-friendly financial terms | Benefits from LLM-assisted terminology expansion |
+| Retrieval / Candidate Recall | Retrieve broad candidate evidence | Needs recall fallback, search strategy control, and broader candidate pools |
+| Evidence Mapping | Link claims to the best supporting evidence | Requires reasoning over metric, number, scope, period, unit, and basis |
+| Evidence Audit | Independently check support quality and risk flags | Requires validation of selected evidence and unresolved claim boundaries |
+| Calculation / Formula Repair | Resolve derived claims and tenant-specific formulas | Requires iterative related-row search, formula hypothesis, deterministic recalculation, and reconciliation |
+| Event Context | Separate table-supported claims from external-context claims | Requires deciding when not to force numeric evidence |
+| Decision / Driver Selection | Decide what is worth saying and what should be omitted | Requires materiality judgment, tenant pattern memory, and driver selection logic |
+| Generation | Write commentary from structured decisions and evidence | Requires style control, grounded wording, and structured output validation |
+| Feedback Learning | Learn from approved edits and finalized commentary | Requires updating tenant memory and historical patterns safely |
+
+Evidence grounding is the core system backbone of FCA. Calculation and formula repair is used as the deep-dive example because it clearly shows why certain responsibilities should evolve from deterministic rules into controlled, tool-using agentic workflows.
 
 ### Why not agent-heavy from day one?
 

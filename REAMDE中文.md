@@ -889,7 +889,7 @@ FCA 被设计为生成 reviewable artifacts，而不只是 final text。
 
 ## 23. System Diagrams / 系统图表
 
-以下图表总结了系统架构、workflow 边界、evidence grounding 逻辑、agent-ready evolution 和 evaluation 方法。
+以下四张图是当前 README 对应的核心可视化材料。
 
 | Diagram | What It Shows |
 |---|---|
@@ -897,11 +897,8 @@ FCA 被设计为生成 reviewable artifacts，而不只是 final text。
 | `onboarding_vs_inference_comparison_chart.png` | 解释 historical pattern learning 和 current-period evidence grounding 的区别 |
 | `system_architecture_and_agent_evolution_diagram.png` | 展示 current implementation、guardrails 和 future agent-ready evolution |
 | `quality_harness_and_debug_workflow.png` | 展示 debugging、evaluation 和 system hardening workflow |
-| `evidence_recall_reranking_iteration.png` | 展示 claim-aware retrieval 和 re-ranking 如何提升 evidence recall |
-| `tenant_formula_learning_flow.png` | 展示 tenant-specific formula patterns 如何被学习和验证 |
-| `claim_coverage_audit_matrix.png` | 展示 covered、missed、calculable 和 external-context claims 如何分类 |
 
-前三张图用于快速理解系统整体结构，后续图表用于更深入的技术讨论。
+这四张图分别用于快速说明系统整体架构、onboarding vs inference 的边界、当前实现到未来 agent-ready 架构的演进，以及 quality harness / debug loop。
 
 ## 24. Roadmap
 

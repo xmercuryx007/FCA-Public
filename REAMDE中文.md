@@ -2,31 +2,35 @@
 
 ### 一个面向证据驱动 FP&A 评论生成的 AI Engineering Case Study
 
-**FCA** 是一个面向多租户、基于证据 grounding 的 AI 工程项目，探索如何基于财务数据、历史 commentary 写作模式，以及可复核的 evidence trail 来生成 FP&A commentary。
+**FCA** 是一个面向多租户、基于证据 grounding 的 AI 工程项目，探索如何把周期性 FP&A performance commentary 转化为一个可 review 的 AI analyst workflow。Commentary 只是 visible output；更深层的问题是 recurring performance explanation workflow：判断什么变了、什么值得 call out、证据在哪里、哪些数字需要 calculation、哪些内容需要 human review。
 
 这个项目不是一个普通的 RAG chatbot，也不是一个简单的 LLM 文本生成 demo。它聚焦于 **boundary-aware AI system design（有边界意识的 AI 系统设计）**：系统需要识别重要财务变动、选择 drivers、把 claims 绑定到 evidence、处理 calculation boundary、学习 tenant-specific formulas，并生成可以被 review、audit、以及通过 feedback 持续改进的 commentary。
 
-> **核心理念：** 目标不是让 AI “听起来像”财务分析师，而是让 AI “表现得像”一个可复核的财务分析师。
-
+> **核心理念：** Commentary 是 visible output。真正要构建的是一个 evidence-backed、calculation-aware、符合团队 reporting standard、并且 human-reviewable 的 AI analyst workflow。
 
 ---
 
 ## 1. 项目概览
 
-Finance / FP&A 团队通常需要按月或按季度撰写 commentary，解释财务表现、budget variance、prior-period movement，以及业务 drivers。
+Finance / FP&A 团队通常需要按月或按季度撰写 commentary，用来解释 actual vs budget、prior-period movement、forecast change、business drivers，以及需要 management attention 的 exceptions。
 
-这项工作虽然重复，但风险很高。一段好的 commentary 不只是文笔流畅。它还必须：
+这件事表面上看起来重复，但真正难的不是“写得更快”。FP&A commentary 是 analyst、manager、executive 和下游读者之间的一层标准化沟通与 review 机制。每个 reporting cycle，analyst 都需要判断：什么变了、这个 variance 是否 material enough to call out、driver 是 account / LOB / department / vendor / region 还是其他 business dimension、数字是否 reconcile，以及这段解释是否符合团队自己的 reporting standard。
 
-- 与团队历史写作风格保持一致；
-- 基于正确的 financial data；
-- 符合 materiality 和 driver-selection 逻辑；
-- 能够被 reviewers 和 managers 解释和复核；
-- 对 calculation assumptions 和 unsupported claims 保持谨慎；
-- 足够 auditable，适合 finance workflow。
+所以，一个真正有用的 AI system 不能只是简单的 text-generation layer。它需要帮助完成：
 
-FCA 通过结合 tenant memory、dynamic retrieval、structured claim understanding、evidence grounding、calculation / reconciliation design、controlled generation 和 human review 来解决这个问题。
+- 判断哪些 movements 足够 material，值得被写进 commentary；
+- 从 account、LOB、department、vendor、region 或其他 tenant-specific business dimensions 中选择 drivers；
+- 保持团队语言、recurring structure 和 shared metric definitions 的一致性；
+- 理解 company-specific formula conventions、basis rules 和 scope definitions；
+- 把 financial claims 绑定到正确的 rows、periods、scopes、units 和 basis；
+- 在进入 review 前检查 numbers、calculations 和 reconciliations 是否合理；
+- 区分 table-supported claims 和 event-driven / management-context claims；
+- 向 reviewer 展示 source evidence、calculation lineage、support status、confidence 和 risk flags；
+- 从 approved edits 中学习，同时不绕过 governance 和 audit boundaries。
 
----
+FCA 通过结合 tenant memory、dynamic retrieval、structured claim understanding、evidence grounding、calculation / reconciliation design、controlled generation、quality harnesses 和 human review 来解决这个问题。
+
+一个关键洞察是：finance commentary pattern 不只是 writing style，而是 finance team 的 operating standard：callout rules、materiality thresholds、driver-selection logic、metric definitions、formulas、preferred phrasing、reviewer expectations 和 approval patterns。
 
 ## 2. 为什么这个问题重要
 
@@ -34,9 +38,7 @@ FCA 通过结合 tenant memory、dynamic retrieval、structured claim understand
 
 > AI 能不能写出一段流畅的段落？
 
-真正的问题是：
-
-> 真正的难点不是 LLM 能不能写出一段流畅的 commentary，而是这个 AI 系统能不能判断什么值得写、把每个关键 claim 绑定到证据、标记 unsupported 或 calculation-boundary 的内容、区分表格数据可支持的 claim 和需要外部业务背景的 claim，并产出能支持人工 review 的审计材料。
+真正的难点不是 LLM 能不能写出一段流畅的 commentary，而是这个 AI 系统能不能判断什么值得写、把每个关键财务 claim 绑定到证据、标记 unsupported 或 calculation-boundary 的内容、区分表格数据可支持的 claim 和需要外部业务背景的 claim，并产出能支持人工 review 的审计材料。
 
 FCA 是围绕第二个问题设计的。
 
@@ -44,21 +46,23 @@ FCA 是围绕第二个问题设计的。
 
 | 痛点 | 为什么重要 | FCA 的设计响应 |
 |---|---|---|
-| Commentary drafting 重复性高 | Analysts 每个 period 都要反复解释类似的 metrics 和 movements | 学习历史 patterns，生成 structured drafts |
-| 不同 analysts 用词不一致 | Reviewers 希望语言和逻辑标准化 | Tenant-specific style 和 pattern memory |
-| Driver selection 依赖判断 | 不是每个大变动都应该被讨论 | Decision Layer 区分 what to say 和 how to say it |
-| Claims 可能缺少 evidence | Finance commentary 必须可复核 | Claim-level evidence grounding 和 audit trail |
-| 有些数值需要 calculation | 不是所有 commentary claims 都能对应到单一 table row | Calculation 和 reconciliation boundary design |
-| 公司/团队特定公式可能不同 | Standard formulas 不一定匹配团队实际 reporting 口径 | Tenant formula learning 和 formula memory |
-| 有些解释需要外部上下文 | 有些 claims 依赖 events、management narrative 或 macro context | Event/context boundary 和 human review flags |
+| Recurring commentary 是一个 high-review-cost workflow | Analysts 每个 reporting cycle 都会重复类似工作，但仍然需要细节判断、数据检查和 manager review | 把 commentary generation 变成 structured、evidence-backed workflow，而不是自由写作任务 |
+| 团队需要标准化 reporting language | Consistent structure 和 terminology 能帮助 reviewer、manager 和 reader 更快理解 recurring metrics | 学习并保留 tenant-specific reporting standard，而不只是 writing style |
+| Driver selection 是 judgment-heavy 的 | 大变动不一定就是最该写的故事，小变动也可能解释核心 business narrative | 用 Decision Layer 和 Generation Layer 分离，让系统先判断 what to say，再写 how to say it |
+| Financial numbers 需要 validation 和 reconciliation | Finance team 通常会人工抽查关键数字，但全量检查耗时且容易漏 | 在 review 前检查 source evidence、calculation lineage、scope / basis alignment 和 reconciliation status |
+| Financial definitions 可能是 tenant-specific | 团队可能有公司特定公式、basis conventions 或 scope definitions，generic model 不会天然知道 | 学习 validated formula patterns，并通过 reconciliation 保存 formula memory |
+| 有些解释不在表格里 | Special events、management narrative 和 macro context 不一定能从 financial table 中证明 | 区分 table-supported claims 和 external-context-needed claims，并交给 human review |
+| Generic AI summary 可能无法覆盖 last-mile workflow | Existing summaries 可以更快解释 variance，但未必能 enforce reporting standards、evidence support、calculation checks 和 approval feedback learning | 产出 reviewable commentary artifacts，包括 source evidence、calculation trace、support status、risk flags 和 feedback memory |
 
----
+### 为什么这个 workflow 现在更可行
+
+这个 workflow 过去很难系统化或自动化，不是因为痛点不存在，而是因为每家公司财务表格格式不同、commentary rules 很多是隐性的，判断分散在 Excel logic、analyst experience、SOP 和 reviewer preferences 里。现在 LLM、retrieval systems、structured outputs 和 human-in-the-loop workflow 让系统更有可能把 messy tables、historical commentary、evidence grounding、calculation checks 和 reviewable generation 连接成一个可控流程。
 
 ## 3. 系统目标
 
 FCA 被设计成一个 **AI-assisted financial analyst workflow**，而不是一个普通 chatbot。
 
-这个项目的目标是展示：如何把一个 finance commentary workflow 拆解成一组 evidence-grounded、reviewable、并且可以安全迭代的技术组件。
+这个项目的目标是展示：如何把周期性的 FP&A performance explanation workflow 拆解成一组 evidence-grounded、reviewable、并且可以安全迭代的技术组件。
 
 目标 workflow 主要围绕以下输入：
 
@@ -74,12 +78,13 @@ FCA 被设计成一个 **AI-assisted financial analyst workflow**，而不是一
 - claim-to-evidence mapping；
 - driver-selection rationale；
 - 如果使用 derived metrics，则包含 calculation lineage；
+- reconciliation / support status；
 - confidence 和 risk flags；
 - audit status；
 - human-review-friendly outputs；
-- 面向未来 periods 的 feedback learning。
+- feedback learning for future periods。
 
----
+更大的系统目标是：帮助 finance team 保存并执行 tenant-specific reporting standard，同时让每个重要 commentary statement 更容易被 review。
 
 ## 4. 从 FP&A Workflow 到 AI System
 
@@ -111,15 +116,26 @@ flowchart LR
 
 ## 5. 为什么 FCA 不是普通 Generic RAG
 
-一个简单 RAG 系统会 retrieve 历史 examples，然后让 LLM 写一个新段落。FCA 做得更多。
+普通 RAG 系统通常是 retrieve historical examples，然后让 LLM 写一段新的 paragraph。FCA 更进一步，因为它的目标不只是 summarize data，而是产出 reviewable commentary artifacts。
 
-FCA 区分了：
+更强的对比是：
+
+| Generic AI Summary | FCA Reviewable Output |
+|---|---|
+| 生成一段流畅解释 | 展示 key commentary statement 以及 source evidence |
+| 可能只是高层总结 variance | 把 statement 连接到 rows、periods、units、scope 和 basis |
+| 不一定说明 claim 为什么被支持 | 展示 calculation trace、support status 和 risk flags |
+| 不一定保留 team-specific standards | 使用 tenant memory 保存 reporting standards、terminology、formulas 和 approval patterns |
+| 通常停留在 text output | 支持 human review、approval 和 feedback learning |
+
+FCA 会区分：
 
 - stable tenant memory 和 dynamic evidence retrieval；
 - historical pattern learning 和 current-period evidence grounding；
 - claim understanding 和 candidate retrieval；
 - evidence selection 和 final evidence audit；
 - calculation reasoning 和 prose generation；
+- reporting-standard memory 和一次性的 writing style；
 - workflow orchestration 和 UI display。
 
 ```mermaid
@@ -134,18 +150,18 @@ flowchart TD
     H --> A
 ```
 
-### CAG-enhanced RAG 定位
+### CAG-enhanced RAG positioning
 
 FCA 更准确地说是：
 
 > **Tenant Memory Cache + Dynamic Evidence Retrieval + Auditable Claim-Grounded Generation**
 
-- **CAG / Tenant Memory Cache** 存储稳定的 tenant knowledge：style、glossary、commentary patterns、materiality preferences、calculation / audit policies、learned formulas 和 known caveats。
-- **RAG / Retrieval** 负责 retrieve dynamic historical examples 和 current-period evidence candidates。
-- **Evidence Mapping and Audit** 确保 generated commentary 是 grounded 且 reviewable 的。
-- **Decision Layer** 在 generation 之前决定什么应该被讨论。
+- **CAG / Tenant Memory Cache** 保存稳定的 tenant knowledge：reporting standards、style、glossary、commentary patterns、materiality preferences、calculation / audit policies、learned formulas、reviewer preferences、approval patterns 和 known caveats。
+- **RAG / Retrieval** 负责检索 dynamic historical examples 和 current-period evidence candidates。
+- **Evidence Mapping and Audit** 确保 generated commentary 是 grounded 和 reviewable 的。
+- **Decision Layer** 在 generation 前决定 what should be discussed。
 
----
+已有 FP&A copilots、BI tools 或 EPM narrative features 可能已经能帮助用户更快 summarize / read data。FCA 关注的是更深的 last-mile workflow：commentary standards、evidence / calculation validation、auditability 和 approved-feedback learning。
 
 ## 6. Onboarding vs Inference
 
@@ -210,6 +226,11 @@ flowchart TB
 ```
 
 ---
+
+### Tenant-isolated reporting memory
+
+这个系统的护城河不是 cross-tenant data mixing。每个 tenant 的 memory 都应该保持隔离，并且只基于该团队授权的 historical data、commentary、formulas、evidence history、review decisions 和 approved edits 构建。长期来看，这会沉淀出该团队“如何解释业绩变化”的 tenant-specific reporting memory。
+
 
 ## 7. 系统架构
 

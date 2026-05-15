@@ -1,16 +1,19 @@
 # FCA — Financial Commentary Autogeneration System
 
-### An Explainable AI Financial Analyst for FP&A Commentary
+### An AI Engineering Case Study for Evidence-Grounded FP&A Commentary
 
-**FCA** is a tenant-aware, evidence-grounded AI system designed to help finance and FP&A teams generate period commentary from financial data, historical commentary patterns, and reviewable evidence trails.
+**FCA** is a tenant-aware, evidence-grounded AI engineering project that explores how FP&A commentary can be generated from financial data, historical commentary patterns, and reviewable evidence trails.
 
-This project is not a generic RAG chatbot or a simple LLM text-generation demo. It is a product-minded AI system that simulates how a finance analyst reasons through financial commentary: identifying material movements, selecting drivers, grounding claims in evidence, handling calculation boundaries, learning tenant-specific formulas, and producing commentary that can be reviewed, audited, and improved through feedback.
+This project is not a generic RAG chatbot or a simple LLM text-generation demo. It is a portfolio case study in boundary-aware AI system design: identifying material movements, selecting drivers, grounding claims in evidence, handling calculation boundaries, learning tenant-specific formulas, and producing commentary that can be reviewed, audited, and improved through feedback.
 
 > **Core idea:** The goal is not to make AI sound like a financial analyst. The goal is to make AI behave like a reviewable financial analyst.
 
+
+> **Portfolio scope:** This README is written as an AI engineering case study for portfolio and technical discussion purposes. It focuses on system design, implementation trade-offs, debugging workflow, and evaluation strategy, without positioning FCA as a commercial product or exposing private implementation details.
+
 ---
 
-## 1. Product Overview
+## 1. Project Overview
 
 Finance teams repeatedly write monthly or quarterly commentary explaining financial performance, budget variance, prior-period movement, and business drivers.
 
@@ -53,11 +56,13 @@ FCA is designed around this second question.
 
 ---
 
-## 3. Product Vision
+## 3. System Goal
 
-FCA is designed to act as an **AI financial analyst coworker**, not as a generic chatbot.
+FCA is structured as an **AI-assisted financial analyst workflow**, not as a generic chatbot.
 
-The system should eventually allow finance teams to upload:
+The goal of the project is to show how a finance commentary workflow can be decomposed into technical components that are evidence-grounded, reviewable, and safe to iterate.
+
+The target workflow is organized around the following inputs:
 
 - historical financial data;
 - historical commentary;
@@ -65,7 +70,7 @@ The system should eventually allow finance teams to upload:
 - optional business or event context;
 - finalized user edits and approval feedback.
 
-The system then generates FP&A-style commentary with:
+The system then produces FP&A-style commentary with:
 
 - selected evidence rows;
 - claim-to-evidence mapping;
@@ -117,7 +122,7 @@ FCA separates:
 - claim understanding from candidate retrieval;
 - evidence selection from final evidence audit;
 - calculation reasoning from prose generation;
-- product orchestration from UI display.
+- workflow orchestration from UI display.
 
 ```mermaid
 flowchart TD
@@ -214,7 +219,7 @@ FCA uses a layered architecture to preserve responsibility boundaries.
 
 ```mermaid
 flowchart TB
-    A[Product Input Layer] --> B[Data Semantic Layer]
+    A[Input Layer] --> B[Data Semantic Layer]
     B --> C[Tenant Memory + Retrieval Layer]
     C --> D[Reasoning Layer]
     D --> E[Controlled Generation + Audit]
@@ -442,7 +447,7 @@ FCA starts with a controlled foundation:
 - classify multi-row or formula-repair cases as calculation capability boundaries;
 - avoid pretending that every uncovered numeric claim is a true evidence failure.
 
-This is not a limitation of the product vision. It is a deliberate staged approach: first make standard calculations reliable and auditable, then expand into controlled formula repair once boundaries and validation logic are clear.
+This is not a limitation of the project scope. It is a deliberate staged approach: first make standard calculations reliable and auditable, then expand into controlled formula repair once boundaries and validation logic are clear.
 
 ### Final architecture direction
 
@@ -457,7 +462,7 @@ A future `CalculationAgent` should support:
 
 ---
 
-## 13. Design Challenge: Tenant-Specific Formula Learning
+## 13. Tenant-Specific Formula Learning
 
 A major challenge in financial commentary is that some numbers are not simple table lookups or standard variances.
 
@@ -531,9 +536,9 @@ In the final architecture, when a standard calculation fails, the system should 
 
 This is one of the reasons FCA uses a staged architecture: formula repair requires iteration, tool use, reconciliation, and careful audit. It is a strong candidate for future agentization, but only after deterministic validation and responsibility boundaries are clear.
 
-### Product framing
+### System framing
 
-This capability should not be framed as a separate future expansion called “validation.” It is part of FCA’s core trust layer.
+This capability should not be framed as a separate add-on called “validation.” It is part of FCA’s core trust layer.
 
 FCA naturally checks whether commentary claims, source evidence, and underlying calculations reconcile before analyst review. In other words:
 
@@ -657,17 +662,17 @@ FCA improves through sample-driven investigation:
 3. check whether each claim is covered;
 4. verify whether covered claims are correctly supported;
 5. classify uncovered claims as retrieval gap, mapping gap, calculation boundary, learned-formula candidate, external-context-needed, or manual-review-needed;
-6. update retrieval, evidence linking, calculation, or product boundary logic accordingly.
+6. update retrieval, evidence linking, calculation, or system boundary logic accordingly.
 
 This mirrors how production AI systems are improved: not by only optimizing one aggregate metric, but by repeatedly inspecting failure modes and turning them into clearer architecture boundaries.
 
 ---
 
-## 18. Product Quality Harness
+## 18. Quality Harness
 
-FCA is designed with a product quality harness around the core pipeline.
+FCA is designed with a quality harness around the core pipeline.
 
-The harness is not the product logic itself. It is a repeatable debugging, evaluation, and hardening workflow that helps the system improve without turning the main pipeline into a black box or a collection of sample-specific patches.
+The harness is not the core pipeline logic itself. It is a repeatable debugging, evaluation, and hardening workflow that helps the system improve without turning the main pipeline into a black box or a collection of sample-specific patches.
 
 In practice, this means FCA is evaluated through intermediate artifacts, not only through final commentary output. The system can inspect whether claim extraction, query expansion, candidate recall, evidence linking, support assessment, calculation, and audit each behaved correctly.
 
@@ -692,7 +697,7 @@ For example, if a numeric claim is uncovered, the harness helps determine whethe
 6. the claim requires calculation, formula repair, or related-row search;
 7. the claim requires external business context and should not be forced into table evidence.
 
-This supports the broader productization strategy: start with a controlled, observable MVP, then introduce stronger retrieval fallback, re-ranking, formula learning, calculation repair, and multi-agent orchestration only after the failure modes are understood.
+This supports the broader implementation strategy: start with a controlled, observable MVP, then introduce stronger retrieval fallback, re-ranking, formula learning, calculation repair, and multi-agent orchestration only after the failure modes are understood.
 
 ```mermaid
 flowchart TB
@@ -737,9 +742,9 @@ Planned / implemented stack areas include:
 
 ---
 
-## 20. Progressive Productization Strategy
+## 20. Progressive Implementation Strategy
 
-FCA is intentionally designed as a staged productization path rather than an agent-heavy system from day one.
+FCA is intentionally designed as a staged implementation path rather than an agent-heavy system from day one.
 
 The initial implementation focuses on building a reliable, reviewable foundation first: clear module boundaries, deterministic guardrails, structured contracts, evidence artifacts, claim coverage diagnostics, and human-review-friendly outputs.
 
@@ -759,7 +764,7 @@ flowchart LR
     E1[CalculationAgent<br/>EvidenceAuditAgent<br/>EventContextAgent<br/>FeedbackLearningAgent] --> E
 ```
 
-This staged approach demonstrates a key product principle:
+This staged approach demonstrates a key engineering principle:
 
 > Move fast enough to ship a useful AI workflow, but not so fast that the system becomes an unreviewable black box.
 
@@ -810,7 +815,7 @@ Focus:
 
 Potential agents:
 
-- ProductInputPreparationAgent;
+- InputPreparationAgent;
 - DataSemanticsAgent;
 - TenantMemoryBuilder / PatternMemoryAgent;
 - ClaimUnderstandingAgent;
@@ -849,7 +854,7 @@ Some claims require formula repair, related-row search, aggregation, or reconcil
 
 Qualitative or event-driven explanations may require external context and human confirmation.
 
-### 6. Human review is part of the product, not an afterthought
+### 6. Human review is part of the system, not an afterthought
 
 FCA is designed to produce reviewable artifacts, not just final text.
 
@@ -861,11 +866,11 @@ The system should learn from cases where evidence is missed, calculation does no
 
 ## 23. Recommended Portfolio Figures
 
-For a public-facing product case study, the strongest figures are:
+For a public portfolio case study, the strongest figures are:
 
 | Figure | Purpose |
 |---|---|
-| `fca_system_architecture_overview.png` | Show the end-to-end product architecture |
+| `fca_system_architecture_overview.png` | Show the end-to-end system architecture |
 | `onboarding_vs_inference_comparison_chart.png` | Explain historical pattern learning vs current evidence grounding |
 | `system_architecture_and_agent_evolution_diagram.png` | Show current implementation, guardrails, and future agent evolution |
 | `evidence_recall_reranking_iteration.png` | Show how claim-aware retrieval and reranking improved evidence recall |
@@ -880,11 +885,11 @@ The first three figures are the most important for a short consultant review. Th
 
 Near-term:
 
-- improve demo-facing portfolio materials;
+- improve portfolio-facing case study materials;
 - add polished architecture diagrams;
 - add sanitized UI screenshots;
 - summarize claim coverage audit results;
-- prepare a concise product walkthrough.
+- prepare a concise technical walkthrough.
 
 Mid-term:
 
@@ -909,7 +914,7 @@ Long-term:
 
 The full implementation codebase, detailed prompts, proprietary contracts, raw datasets, and internal debug artifacts are kept private.
 
-This public case study is intended to share the product vision, architecture, reasoning workflow, sanitized examples, and evaluation approach without exposing sensitive implementation details or confidential data.
+This public case study is intended to share the system design, architecture, reasoning workflow, sanitized examples, and evaluation approach without exposing sensitive implementation details or confidential data.
 
 ---
 

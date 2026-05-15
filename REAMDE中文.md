@@ -37,7 +37,7 @@ FCA 通过结合 tenant memory、dynamic retrieval、structured claim understand
 
 真正的问题是：
 
-> AI 能不能判断什么该说，把每个重要 claim ground 到 evidence，标记 unsupported statements，区分 data-supported claims 和 external-context claims，并支持 human review process？
+> 真正的难点不是 LLM 能不能写出一段流畅的 commentary，而是这个 AI 系统能不能判断什么值得写、把每个关键 claim 绑定到证据、标记 unsupported 或 calculation-boundary 的内容、区分表格数据可支持的 claim 和需要外部业务背景的 claim，并产出能支持人工 review 的审计材料。
 
 FCA 是围绕第二个问题设计的。
 

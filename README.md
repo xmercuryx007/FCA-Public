@@ -327,7 +327,7 @@ This prevents the system from treating a multi-claim financial statement as one 
 
 ---
 
-## 10. Design Challenge: Evidence Recall and Re-ranking
+## 10. Evidence Recall and Re-ranking
 
 One of the key system challenges in FCA is that evidence grounding can fail before the EvidenceLinker even runs.
 

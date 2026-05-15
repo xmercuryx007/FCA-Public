@@ -36,11 +36,11 @@ Many AI writing tools can generate a paragraph that looks like financial comment
 
 > Can the AI write a fluent paragraph?
 
-The real question is:
+The real challenge is:
 
-> Can the AI decide what should be said, ground each important claim in evidence, flag unsupported statements, distinguish data-supported claims from external-context claims, and support a human review process?
+> The real challenge is not whether an LLM can write a fluent paragraph, but whether an AI system can decide what is worth saying, ground each material financial claim in evidence, flag unsupported or calculation-boundary statements, distinguish table-supported claims from external-context claims, and produce reviewable artifacts for human oversight.
 
-FCA is designed around this second question.
+FCA is designed around this second challenge.
 
 ### Key pain points in current finance commentary workflows
 

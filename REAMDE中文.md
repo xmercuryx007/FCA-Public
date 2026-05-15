@@ -4,11 +4,10 @@
 
 **FCA** 是一个面向多租户、基于证据 grounding 的 AI 工程项目，探索如何基于财务数据、历史 commentary 写作模式，以及可复核的 evidence trail 来生成 FP&A commentary。
 
-这个项目不是一个普通的 RAG chatbot，也不是一个简单的 LLM 文本生成 demo。它更像是一个关于 **boundary-aware AI system design（有边界意识的 AI 系统设计）** 的 portfolio case study：系统需要识别重要财务变动、选择 drivers、把 claims 绑定到 evidence、处理 calculation boundary、学习 tenant-specific formulas，并生成可以被 review、audit、以及通过 feedback 持续改进的 commentary。
+这个项目不是一个普通的 RAG chatbot，也不是一个简单的 LLM 文本生成 demo。它聚焦于 **boundary-aware AI system design（有边界意识的 AI 系统设计）**：系统需要识别重要财务变动、选择 drivers、把 claims 绑定到 evidence、处理 calculation boundary、学习 tenant-specific formulas，并生成可以被 review、audit、以及通过 feedback 持续改进的 commentary。
 
 > **核心理念：** 目标不是让 AI “听起来像”财务分析师，而是让 AI “表现得像”一个可复核的财务分析师。
 
-> **Portfolio 范围说明：** 这份 README 是作为 AI engineering case study，用于 portfolio 展示和技术讨论。它聚焦于系统设计、实现 trade-off、debug workflow 和 evaluation strategy；不把 FCA 定位成商业产品，也不暴露私有实现细节。
 
 ---
 
@@ -888,28 +887,27 @@ FCA 被设计为生成 reviewable artifacts，而不只是 final text。
 
 ---
 
-## 23. Recommended Portfolio Figures
+## 23. System Diagrams / 系统图表
 
-对于 public portfolio case study，最强的 figures 是：
+以下图表总结了系统架构、workflow 边界、evidence grounding 逻辑、agent-ready evolution 和 evaluation 方法。
 
-| Figure | Purpose |
+| Diagram | What It Shows |
 |---|---|
-| `fca_system_architecture_overview.png` | 展示 end-to-end system architecture |
-| `onboarding_vs_inference_comparison_chart.png` | 解释 historical pattern learning vs current evidence grounding |
-| `system_architecture_and_agent_evolution_diagram.png` | 展示 current implementation、guardrails 和 future agent evolution |
-| `evidence_recall_reranking_iteration.png` | 展示 claim-aware retrieval 和 reranking 如何提升 evidence recall |
-| `tenant_formula_learning_flow.png` | 展示 onboarding 如何学习 validated tenant-specific formulas |
+| `fca_system_architecture_overview.png` | 展示从 financial inputs 到 reviewable commentary 的 end-to-end architecture |
+| `onboarding_vs_inference_comparison_chart.png` | 解释 historical pattern learning 和 current-period evidence grounding 的区别 |
+| `system_architecture_and_agent_evolution_diagram.png` | 展示 current implementation、guardrails 和 future agent-ready evolution |
+| `quality_harness_and_debug_workflow.png` | 展示 debugging、evaluation 和 system hardening workflow |
+| `evidence_recall_reranking_iteration.png` | 展示 claim-aware retrieval 和 re-ranking 如何提升 evidence recall |
+| `tenant_formula_learning_flow.png` | 展示 tenant-specific formula patterns 如何被学习和验证 |
 | `claim_coverage_audit_matrix.png` | 展示 covered、missed、calculable 和 external-context claims 如何分类 |
 
-前三张图最适合 short consultant review。后面的图更适合 deeper technical case study。
-
----
+前三张图用于快速理解系统整体结构，后续图表用于更深入的技术讨论。
 
 ## 24. Roadmap
 
 Near-term：
 
-- 改进 portfolio-facing case study materials；
+- 改进技术说明文档和 demo walkthrough materials；
 - 增加 polished architecture diagrams；
 - 增加 sanitized UI screenshots；
 - 总结 claim coverage audit results；
@@ -932,16 +930,3 @@ Long-term：
 - 支持 recency-aware tenant pattern drift；
 - 支持完整 claim-level evidence audit 和 feedback learning。
 
----
-
-## 25. Repository Disclosure Note
-
-完整 implementation codebase、detailed prompts、proprietary contracts、raw datasets 和 internal debug artifacts 保持 private。
-
-这份 public case study 的目的，是分享 system design、architecture、reasoning workflow、sanitized examples 和 evaluation approach，而不暴露敏感实现细节或 confidential data。
-
----
-
-## 26. 一句话总结
-
-FCA 是一个 evidence-grounded、tenant-aware 的 AI financial analyst system，它把重复性的 FP&A commentary 工作转化为一个 structured、reviewable、auditable，并且可以持续改进的 AI workflow。
